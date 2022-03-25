@@ -14,7 +14,7 @@ OBJS    = $(addprefix $(BINDIR), $(_OBJS))
 
 all: $(BIN)
 
-$(BIN): $(BINDIR) runner main fault-local trace
+$(BIN): $(BINDIR) runner main trace fault-local 
 	$(CC) $(OBJS) -fsanitize=address -g -o $(BIN)
 
 $(BINDIR):
@@ -26,7 +26,7 @@ runner : src/runner.c
 main : src/main.c
 	$(CC) -g -c -o bin/main.o src/main.c
 
-fault-local: src/fault-local
+fault-local: src/fault-local.c
 	$(CC) -g -c -o bin/fault-local.o src/fault-local.c
 
 trace : src/trace-pc.c
@@ -35,5 +35,3 @@ trace : src/trace-pc.c
 clean:
 	rm -rf $(BINDIR)
 
-test: $(BIN)
-	$(CC) -g -fsanitize=address -fsanitize-coverage=trace-pc-guard -o bin/jsondump #test/test_c_with_three_input/triangle.c bin/trace-pc.o
