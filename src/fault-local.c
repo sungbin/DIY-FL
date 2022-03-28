@@ -8,6 +8,7 @@
 #include "../include/fault-local.h"
 #include "../include/runner.h"
 #include "../include/tarantula.h"
+#include "../include/sbi.h"
 
 #define MAX(a,b) a > b ? a : b
 
@@ -19,10 +20,11 @@ void
 write_branch_files (char * dir_path);
 
 void
-bcov_tarantula (char * dir_path) {
+false_localization (char * dir_path) {
 
 	write_branch_files(dir_path);
 	tarantula(dir_path);
+	sbi(dir_path);
 }
 
 void
@@ -55,6 +57,7 @@ write_branch_files (char * dir_path) {
 
 				if(strstr(ep->d_name, ".bcov") != NULL) {
 
+					/*
 					if ((ep->d_name)[1] != '-') {
                                                continue;
                                         }
@@ -66,6 +69,7 @@ write_branch_files (char * dir_path) {
                                         else if ((ep->d_name)[0] == 'f' && (ep->d_name)[1] == '-') {
                                                fn++;
                                         }
+					*/
 						
 	                        	int parrent_len = strlen(dir_path);
 	                        	int child_len = strlen(ep->d_name);

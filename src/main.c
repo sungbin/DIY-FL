@@ -25,14 +25,14 @@ main (int argc, char* argv[])
 	else if (strcmp(argv[1], "-bcov") == 0) {
 
 		is_bcov = 1;
-		//multiple_runner(argv[4], argv[2], argv[3], is_bcov);
-		bcov_tarantula(argv[3]);
+		multiple_runner(argv[4], argv[2], argv[3], is_bcov);
+		false_localization(argv[3]);
 	}
 	else if (strcmp(argv[4], "-bcov") == 0) {
 
 		is_bcov = 1;
-		//multiple_runner(argv[3], argv[1], argv[2], is_bcov);
-		bcov_tarantula(argv[2]);
+		multiple_runner(argv[3], argv[1], argv[2], is_bcov);
+		false_localization(argv[2]);
 	}
 	else {
                 fprintf(stderr, "ERROR: THE NUMBER OF AGURMENTS MUST BE BIGGER THAN THREE!\n");

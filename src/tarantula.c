@@ -14,16 +14,19 @@
 suscon_t * suscon_list = NULL;
 
 suscon_t *
-sort_rank ();
+sort_rank_tarantula ();
 
 suscon_t *
 find_max_suscon ();
 
 void
+suspicious_confidence (char * dir_path);
+
+void
 free_suscon (suscon_t * suscon);
 
 void
-print_result (suscon_t * sorted_list);
+print_tarantula (suscon_t * sorted_list);
 
 void
 add_suscon_list (suscon_t * suscon);
@@ -34,12 +37,13 @@ void
 tarantula (char * dir_path) {
 
 	suspicious_confidence(dir_path);
-	suscon_t * sorted_list = sort_rank();
+	suscon_t * sorted_list = sort_rank_tarantula();
+	printf("Tarantula\n");
 	printf("Total Number of Branch: %u\n", total_branch);
 	printf("Total Number of Bcov Files: %d\n", bcovc);
 	printf("Number of Test Failure: %d\nNumber of Test Pass: %d\n", fn, pn);
 
-	print_result(sorted_list);
+	print_tarantula(sorted_list);
 	free_suscon(sorted_list);
 }
 
@@ -149,7 +153,7 @@ add_suscon_list (suscon_t * suscon) {
 
 
 suscon_t *
-sort_rank () {	
+sort_rank_tarantula () {	
 	suscon_t * sorted_list = NULL;
 
 	suscon_t * max_suscon;
@@ -213,7 +217,6 @@ find_max_suscon() {
 	suscon_t * max_suscon = NULL;
 	suscon_t * sc = suscon_list;
 
-	int cnt = 0;
 	while (sc != NULL) {
 
 		if (max_suscon == NULL) {
@@ -227,20 +230,16 @@ find_max_suscon() {
 		}
 
 		sc = sc->next;
-		cnt++;
 	}
 
 	return max_suscon;
 }
 
 void
-print_result (suscon_t * sorted_list) {
+print_tarantula (suscon_t * sorted_list) {
 	suscon_t * sc = sorted_list;
-	int cnt = 0;
 	while (sc != NULL) {
 		printf("branch %u \nsuspiciousness:%.2f, confidence:%.2f\n\n", sc->branch, sc->sus, sc->con);
 		sc = sc->next;
-		cnt++;
 	}
-	fprintf(stderr, "p cnt: %d\n", cnt);
 }
