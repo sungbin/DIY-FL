@@ -103,14 +103,11 @@ runner (char* target_path, char* input_path, char *output_path, int is_bcov) {
 			char * d_name = dirname(strdup(output_path));
 			bcov_path = malloc(sizeof(char) * (strlen(f_name) + strlen(d_name) + 11));
 
-			if (error_code.exit_code == 1) {
-				sprintf(bcov_path, "%s/f-%s.bcov", d_name, f_name);
-			}
-			else if (error_code.exit_code == 0) {
+			if (error_code.type == NO_ERROR && error_code.exit_code == 0) {
 				sprintf(bcov_path, "%s/p-%s.bcov", d_name, f_name);
 
 			} else {
-				sprintf(bcov_path, "%s/%s.bcov", d_name, f_name);
+				sprintf(bcov_path, "%s/f-%s.bcov", d_name, f_name);
 			}
 
 			if (rename("./temp.bcov", bcov_path) == -1) {
@@ -201,14 +198,14 @@ explore_dir_with_runner (char * input_dir_path, char * sub_dir, runner_error_cod
 			if (error_code.type == NO_ERROR) {
 				
 				if (error_code.exit_code == 1) {
-					fprintf(stderr,"BufferOver run: %s\n", input_path);
+					//fprintf(stderr,"BufferOver run: %s\n", input_path);
 				}
 				else {
-					fprintf(stderr,"No ERROR: %s\n", input_path);
+					//fprintf(stderr,"No ERROR: %s\n", input_path);
 				}
 			}
 			else {
-				fprintf(stderr,"Fail to run with: %s\n", input_path);
+				//fprintf(stderr,"Fail to run with: %s\n", input_path);
 			}
 
                         if (recursive_dir && ep->d_type == DT_DIR) {
@@ -343,17 +340,6 @@ read_bcov (char * bcov_path) {
 		//update_branch_set(b_set, branch);
 
 	} while(buf_len > 0);
-
-	//print bcov
-	/*
-	printf("print bcov {");
-	bcov * _b = b;
-	while(_b != 0x0) {
-		printf("%u, ", _b->branch);
-		_b = _b->next;
-	}
-	printf("\b\b}\n");
-	*/
 
 	fclose(bcov_fp);
 	return b;

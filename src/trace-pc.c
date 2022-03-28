@@ -7,6 +7,10 @@
 
 #include "../include/trace-pc.h"
 
+extern int fn;
+extern int pn;
+extern int bcovc;
+
 FILE * bcov_fp = 0x0;
 unsigned int N = 0;  // Counter for the guards.
 int minit = 0;

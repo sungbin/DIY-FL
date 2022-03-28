@@ -14,7 +14,7 @@ OBJS    = $(addprefix $(BINDIR), $(_OBJS))
 
 all: $(BIN)
 
-$(BIN): $(BINDIR) runner main trace fault-local 
+$(BIN): $(BINDIR) runner main trace fault-local tarantula
 	$(CC) $(OBJS) -fsanitize=address -g -o $(BIN)
 
 $(BINDIR):
@@ -31,6 +31,9 @@ fault-local: src/fault-local.c
 
 trace : src/trace-pc.c
 	$(CC) -fsanitize=address -g -o bin/trace-pc.o -c src/trace-pc.c 
+
+tarantula : src/tarantula.c
+	$(CC) -fsanitize=address -g -o bin/tarantula.o -c src/tarantula.c 
 
 clean:
 	rm -rf $(BINDIR)
