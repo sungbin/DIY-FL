@@ -125,4 +125,5 @@ rank_dic4 = analysis_sus(dict4)
 path_list = sorted(rank_dic4.items(), key=functools.cmp_to_key(compare), reverse = False)
 
 for k, val in path_list:
-    print(k, rank_dic1[k], rank_dic2[k], rank_dic3[k], rank_dic4[k])
+    print('{}, {}, {}, {}, {}'.format(k, rank_dic1[k], rank_dic2[k], rank_dic3[k], rank_dic4[k]))
+
