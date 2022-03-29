@@ -77,7 +77,7 @@ suspicious_confidence (char * dir_path) {
 	                } else {
 
 				unsigned int branch;
-				if(strstr(ep->d_name, ".branch") != NULL && strstr(ep->d_name, ".suscon") == 0x0) {
+				if (strstr(ep->d_name, ".branch") && strlen(strstr(ep->d_name, ".branch")) == 7) {
 
 					sscanf(ep->d_name, "%u", &branch);
 
@@ -121,6 +121,16 @@ suspicious_confidence (char * dir_path) {
 
 					add_suscon_list(suscon);
 
+					// write suscon
+	                        	char * suscon_path = malloc(sizeof(char) * (parrent_len+child_len+11));
+	                        	sprintf(suscon_path, "%s/%d.suscon", dir_path, branch);
+					FILE * suscon_fp = fopen(suscon_path, "wb");
+
+					fwrite(&suspect, 1, 4, suscon_fp);
+					fwrite(&conf, 1, 4, suscon_fp);
+
+					fclose(suscon_fp);
+					free(suscon_path);
 					free(inner_file_path);
 				}
 	                }

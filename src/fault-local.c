@@ -9,6 +9,8 @@
 #include "../include/runner.h"
 #include "../include/tarantula.h"
 #include "../include/sbi.h"
+#include "../include/jaccard.h"
+#include "../include/ochiai.h"
 
 #define MAX(a,b) a > b ? a : b
 
@@ -25,6 +27,8 @@ false_localization (char * dir_path) {
 	write_branch_files(dir_path);
 	tarantula(dir_path);
 	sbi(dir_path);
+	jaccard(dir_path);
+	ochiai(dir_path);
 }
 
 void

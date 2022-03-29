@@ -77,7 +77,7 @@ predicate (char * dir_path) {
 	                } else {
 
 				unsigned int branch;
-				if(strstr(ep->d_name, ".branch") != NULL && strstr(ep->d_name, ".precat") == 0x0) {
+				if (strstr(ep->d_name, ".branch") && strlen(strstr(ep->d_name, ".branch")) == 7) {
 
 					sscanf(ep->d_name, "%u", &branch);
 
@@ -102,11 +102,9 @@ predicate (char * dir_path) {
 							fail_n ++;
 						}
 					}
-					float p_fail = pass_n / pn;
-					float p_pass = fail_n / fn;
 					float suspect = 0.0f;
 					if (pass_n + fail_n != 0) {
-						suspect = p_fail / (p_fail + p_pass);
+						suspect = fail_n / (fail_n + pass_n);
 					}
 
 					precat_t * precat = malloc(sizeof(precat_t));
@@ -115,6 +113,15 @@ predicate (char * dir_path) {
 					precat->next = NULL;
 
 					add_precat_list(precat);
+
+	                        	char * suscon_path = malloc(sizeof(char) * (parrent_len+child_len+11));
+	                        	sprintf(suscon_path, "%s/%d.ssus", dir_path, branch);
+					FILE * suscon_fp = fopen(suscon_path, "wb");
+
+					fwrite(&suspect, 1, 4, suscon_fp);
+
+					fclose(suscon_fp);
+					free(suscon_path);
 
 					free(inner_file_path);
 				}
