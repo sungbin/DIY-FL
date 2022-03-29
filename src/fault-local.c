@@ -57,7 +57,6 @@ write_branch_files (char * dir_path) {
 
 				if(strstr(ep->d_name, ".bcov") != NULL) {
 
-					/*
 					if ((ep->d_name)[1] != '-') {
                                                continue;
                                         }
@@ -69,7 +68,6 @@ write_branch_files (char * dir_path) {
                                         else if ((ep->d_name)[0] == 'f' && (ep->d_name)[1] == '-') {
                                                fn++;
                                         }
-					*/
 						
 	                        	int parrent_len = strlen(dir_path);
 	                        	int child_len = strlen(ep->d_name);
@@ -84,22 +82,26 @@ write_branch_files (char * dir_path) {
 
 						unsigned int branch = _blist->branch;
 
+						//printf("FAIL: %d\n", _blist->fail);
+
 						char * branch_fname = malloc(sizeof(char) * (parrent_len + 23));
 
 						sprintf(branch_fname, "%s/%u.branch", dir_path, branch);
 
 						FILE * fp = fopen(branch_fname, "ab");
-						if ((ep->d_name)[0] == 'p' && (ep->d_name)[1] == '-') {
+						
+						if ((ep->d_name)[0] == 'p') {
 							int n = 0;
 							fputc(n, fp);
 						}
-						else if ((ep->d_name)[0] == 'f' && (ep->d_name)[1] == '-') {
+						else if ((ep->d_name)[0] == 'f') {
 							int n = 1;
 							fputc(n, fp);
 						}
 						else { 
-							//exit code != 1
+
 						}
+						
 						fclose(fp);
 						free(branch_fname);
 						_blist = _blist->next;

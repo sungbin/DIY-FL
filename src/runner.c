@@ -34,9 +34,10 @@ multiple_runner (char * target_path, char * input_dir_path, char * output_dir_pa
 
 	int is_dir = 0;
 	explore_dir_with_runner(input_dir_path, "",  &runner, target_path, output_dir_path, is_dir, is_bcov);
-	if (is_bcov) {
-	}
 }
+
+int bcnt = 0;
+int _bcnt = 0;
 
 runner_error_code
 runner (char* target_path, char* input_path, char *output_path, int is_bcov) {
@@ -52,17 +53,18 @@ runner (char* target_path, char* input_path, char *output_path, int is_bcov) {
 
 	char * bcov_path;
 	char * bcov_env;
+	char * f_name;
+	char * d_name;
 	if (is_bcov) {
 
-		char * f_name = basename(input_path);
-		char * d_name = dirname(strdup(output_path));
+		f_name = basename(input_path);
+		d_name = dirname(strdup(output_path));
 		bcov_path = malloc(sizeof(char) * (strlen(f_name) + strlen(d_name) + 11));
 		sprintf(bcov_path, "%s/%s.bcov", d_name, f_name);
 
 		bcov_env = malloc(sizeof(char) * (strlen(bcov_path) + 20));
 		sprintf(bcov_env, "BCOV_PATH=%s", bcov_path);
 
-		free(d_name);
 	}
 
         /* Child process */
@@ -85,7 +87,7 @@ runner (char* target_path, char* input_path, char *output_path, int is_bcov) {
 	       		putenv(bcov_env);
 		}
 
-	       execl(target_path, target_path,NULL);
+	       execl(target_path, target_path, NULL);
 	       _exit(1);
         }
 
@@ -113,12 +115,14 @@ runner (char* target_path, char* input_path, char *output_path, int is_bcov) {
 		runner_error_code error_code = get_error(E_TIMEOUT_KILL, exit_stated);
 
 		if (is_bcov) {
-			FILE * bcov_fp = fopen(bcov_path, "ab");
-			int val = 1000000001;
-			fwrite(&val, 1, 4, bcov_fp);
-			fclose(bcov_fp);
+			char * new_name = malloc(sizeof(char) * (strlen(f_name) + strlen(d_name) + 13) );
+			sprintf(new_name, "%s/f-%s.bcov", d_name, f_name);
+			rename(bcov_path, new_name);
+
+			free(new_name);
 			free(bcov_path);
 			free(bcov_env);
+			free(d_name);
 		}
 		return error_code;
 	}
@@ -127,18 +131,19 @@ runner (char* target_path, char* input_path, char *output_path, int is_bcov) {
 		runner_error_code error_code = get_error(NO_ERROR, exit_stated);
 
 		if (is_bcov) {
-			FILE * bcov_fp = fopen(bcov_path, "ab");
-			int val;
-			if (exit_stated == 0) {
-				val = 1000000000;
+			char * new_name = malloc(sizeof(char) * (strlen(f_name) + strlen(d_name) + 13));
+			if (error_code.exit_code == 0) {
+				sprintf(new_name, "%s/p-%s.bcov", d_name, f_name);
+				rename(bcov_path, new_name);
 			}
 			else {
-				val = 1000000001;
+				sprintf(new_name, "%s/f-%s.bcov", d_name, f_name);
+				rename(bcov_path, new_name);
 			}
-			fwrite(&val, 1, 4, bcov_fp);
-			fclose(bcov_fp);
+			free(new_name);
 			free(bcov_path);
 			free(bcov_env);
+			free(d_name);
 		}
 			
 		return error_code;
@@ -302,6 +307,7 @@ free_bcov (bcov * b) {
 	}
 }
 
+
 bcov*
 read_bcov (char * bcov_path) {
 
@@ -311,21 +317,11 @@ read_bcov (char * bcov_path) {
 
 	bcov * b = 0x0;
 	bcov * last_b = 0x0;
+
 	do {
 		unsigned int branch;
 		buf_len = fread(&branch, 1, 4, bcov_fp);
 		if (buf_len != 4) break;
-
-		if (branch >= 1000000000) {
-			printf("bcov: %u %d\n", branch, branch);
-			if ((branch - 1000000000) == 1) {
-				fn++;
-			}
-			else {
-				pn++;
-			}
-			break;
-		}
 
 		unsigned int des_len;
 		buf_len = fread(&des_len, 1, 4, bcov_fp);
@@ -358,7 +354,7 @@ read_bcov (char * bcov_path) {
 				
 				_b = _b->next;
 			}
-			if (dupl) break;
+			if (dupl) continue;
 			
 
 			_b = malloc(sizeof(bcov));
