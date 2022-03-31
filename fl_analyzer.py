@@ -94,7 +94,7 @@ def analysis_sus(dic):
     return new_dic
 
 
-path = "./result/*"
+path = "./bin/result/*"
 file_list = glob.glob(path)
 
 suscon_list = [file for file in file_list if file.endswith(".suscon")]
@@ -112,10 +112,12 @@ dict2 = sorted(ssus_dic.items(), key = lambda item: item[1], reverse = True)
 dict3 = sorted(jsus_dic.items(), key = lambda item: item[1], reverse = True)
 dict4 = sorted(osus_dic.items(), key = lambda item: item[1], reverse = True)
 
-#analysis_sus_print(dict1)
-#analysis_sus_print(dict2)
-#analysis_sus_print(dict3)
-#analysis_sus_print(dict4)
+'''
+analysis_sus_print(dict1)
+analysis_sus_print(dict2)
+analysis_sus_print(dict3)
+analysis_sus_print(dict4)
+'''
 
 rank_dic1 = analysis_sus(dict1)
 rank_dic2 = analysis_sus(dict2)

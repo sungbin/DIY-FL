@@ -37,7 +37,6 @@ multiple_runner (char * target_path, char * input_dir_path, char * output_dir_pa
 }
 
 int bcnt = 0;
-int _bcnt = 0;
 
 runner_error_code
 runner (char* target_path, char* input_path, char *output_path, int is_bcov) {
@@ -112,6 +111,7 @@ runner (char* target_path, char* input_path, char *output_path, int is_bcov) {
 		// Time out Kill
 		kill(pid, SIGKILL);
 		wait(&status);
+		fprintf(stderr, "kill %d (%s)\n",++bcnt, input_path);
 		runner_error_code error_code = get_error(E_TIMEOUT_KILL, exit_stated);
 
 		if (is_bcov) {

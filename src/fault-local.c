@@ -25,10 +25,12 @@ void
 false_localization (char * dir_path) {
 
 	write_branch_files(dir_path);
+	/*
 	tarantula(dir_path);
 	sbi(dir_path);
 	jaccard(dir_path);
 	ochiai(dir_path);
+	*/
 }
 
 void

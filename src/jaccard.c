@@ -6,49 +6,49 @@
 #include <string.h>
 
 #include "../include/fault-local.h"
-#include "../include/tarantula.h"
+#include "../include/jaccard.h"
 #include "../include/runner.h"
 
 #define MAX(a,b) a > b ? a : b
 
-suscon_t * suscon_list = NULL;
+jsusp_t * jsusp_list = NULL;
 
-suscon_t *
-sort_rank_tarantula ();
+jsusp_t *
+sort_rank_jaccard ();
 
-suscon_t *
-find_max_suscon ();
-
-void
-suspicious_confidence (char * dir_path);
+jsusp_t *
+find_max_jsusp ();
 
 void
-free_suscon (suscon_t * suscon);
+diaccuracy (char * dir_path);
 
 void
-print_tarantula (suscon_t * sorted_list);
+free_jsusp (jsusp_t * jsusp);
 
 void
-add_suscon_list (suscon_t * suscon);
+print_result_jaccard (jsusp_t * sorted_list);
+
+void
+add_jsusp_list (jsusp_t * jsusp);
 
 unsigned total_branch;
 
 void
-tarantula (char * dir_path) {
+jaccard (char * dir_path) {
 
-	suspicious_confidence(dir_path);
-	suscon_t * sorted_list = sort_rank_tarantula();
-	printf("Tarantula\n");
+	diaccuracy(dir_path);
+	jsusp_t * sorted_list = sort_rank_jaccard();
+	printf("Jaccard\n");
 	printf("Total Number of Branch: %u\n", total_branch);
 	printf("Total Number of Bcov Files: %d\n", bcovc);
 	printf("Number of Test Failure: %d\nNumber of Test Pass: %d\n", fn, pn);
 
-	print_tarantula(sorted_list);
-	free_suscon(sorted_list);
+	print_result_jaccard(sorted_list);
+	free_jsusp(sorted_list);
 }
 
 void
-suspicious_confidence (char * dir_path) {
+diaccuracy (char * dir_path) {
 
 	DIR * dp = opendir(dir_path);
 	struct dirent *ep;
@@ -72,7 +72,7 @@ suspicious_confidence (char * dir_path) {
 	                        sprintf(inner_dir_path, "%s/%s",dir_path,ep->d_name);
 	                        //printf(" \t DIR: %s\n", inner_dir_path);
 
-	                        suspicious_confidence(inner_dir_path);
+	                        diaccuracy(inner_dir_path);
 	                        free(inner_dir_path);
 	                } else {
 
@@ -102,37 +102,27 @@ suspicious_confidence (char * dir_path) {
 							fail_n ++;
 						}
 					}
-					float p_pass = pass_n / pn;
-					float p_fail = fail_n / fn;
-					float suspect;
-					if (p_fail + p_pass != 0) {
-						suspect = p_fail / (p_fail + p_pass);
+					float suspect = 0.0f;
+					if (fn + pass_n != 0) {
+						suspect = fail_n / (fn + pass_n);
 					}
-					else {
-						suspect = 0.0f;
-					}
-					float conf = MAX(p_fail, p_pass);
 
-					printf("%u %.f %.f (%u, %u)\n", branch, pass_n, fail_n, pn, fn);
+					jsusp_t * jsusp = malloc(sizeof(jsusp_t));
+					jsusp->branch = branch;
+					jsusp->sus = suspect;
+					jsusp->next = NULL;
 
-					suscon_t * suscon = malloc(sizeof(suscon_t));
-					suscon->branch = branch;
-					suscon->sus = suspect;
-					suscon->con = conf;
-					suscon->next = NULL;
+					add_jsusp_list(jsusp);
 
-					add_suscon_list(suscon);
-
-					// write suscon
 	                        	char * suscon_path = malloc(sizeof(char) * (parrent_len+child_len+11));
-	                        	sprintf(suscon_path, "%s/%d.suscon", dir_path, branch);
+	                        	sprintf(suscon_path, "%s/%d.jsus", dir_path, branch);
 					FILE * suscon_fp = fopen(suscon_path, "wb");
 
 					fwrite(&suspect, 1, 4, suscon_fp);
-					fwrite(&conf, 1, 4, suscon_fp);
 
 					fclose(suscon_fp);
 					free(suscon_path);
+
 					free(inner_file_path);
 				}
 	                }
@@ -148,110 +138,107 @@ suspicious_confidence (char * dir_path) {
 
 
 void
-add_suscon_list (suscon_t * suscon) {
+add_jsusp_list (jsusp_t * jsusp) {
 
-	if (suscon_list == NULL) {
-		suscon_list = suscon;
+	if (jsusp_list == NULL) {
+		jsusp_list = jsusp;
 		return;
 	}
 
-	suscon_t * sc = suscon_list;
+	jsusp_t * sc = jsusp_list;
 	while (sc->next != NULL) {
 		sc = sc->next;
 	}
 
-	sc->next = suscon;
+	sc->next = jsusp;
 }
 
 
-suscon_t *
-sort_rank_tarantula () {	
-	suscon_t * sorted_list = NULL;
+jsusp_t *
+sort_rank_jaccard () {	
+	jsusp_t * sorted_list = NULL;
 
-	suscon_t * max_suscon;
-	while ((max_suscon = find_max_suscon(suscon_list)) != NULL) {
+	jsusp_t * max_jsusp;
+	while ((max_jsusp = find_max_jsusp(jsusp_list)) != NULL) {
 
-		suscon_t * sc = suscon_list;
+		jsusp_t * sc = jsusp_list;
 
-		if (sc == max_suscon) {
+		if (sc == max_jsusp) {
 
-			// (sc == max_suscon) => (sc2)
-			suscon_list = suscon_list->next;
+			// (sc == max_jsusp) => (sc2)
+			jsusp_list = jsusp_list->next;
 		}
-		else if (max_suscon->next != NULL) {
+		else if (max_jsusp->next != NULL) {
 
-			// (sc) => (max_suscon) => (sc2)
-			while (sc->next != max_suscon) {
+			// (sc) => (max_jsusp) => (sc2)
+			while (sc->next != max_jsusp) {
 				sc = sc->next;
 			} 
-			suscon_t * sc2 = max_suscon->next; 
+			jsusp_t * sc2 = max_jsusp->next; 
 			sc->next = sc2;
 		}
 		else {
 		
-			// (sc2) => (max_suscon) => null
-			suscon_t * sc2 = suscon_list;
-			while (sc2->next != max_suscon) {
+			// (sc2) => (max_jsusp) => null
+			jsusp_t * sc2 = jsusp_list;
+			while (sc2->next != max_jsusp) {
 				sc2 = sc2->next;
 			}
 			sc2->next = NULL;
 		}
-		max_suscon->next = NULL;
+		max_jsusp->next = NULL;
 
 		if (sorted_list == NULL) {
-			sorted_list = max_suscon;
+			sorted_list = max_jsusp;
 		}
 		else {
-			suscon_t * sc2 = sorted_list; 
+			jsusp_t * sc2 = sorted_list; 
 			while (sc2->next != NULL) {
 				sc2 = sc2->next;
 			}
-			sc2->next = max_suscon;
+			sc2->next = max_jsusp;
 		}
 	}
 	return sorted_list;
 }
 
 void
-free_suscon (suscon_t * suscon) {
+free_jsusp (jsusp_t * jsusp) {
 
-	suscon_t * next;
-	while (suscon != NULL) {
-	        next = suscon->next;
-	        free(suscon);
-	        suscon = next;
+	jsusp_t * next;
+	while (jsusp != NULL) {
+	        next = jsusp->next;
+	        free(jsusp);
+	        jsusp = next;
 	}
 }
 
-suscon_t *
-find_max_suscon() {
+jsusp_t *
+find_max_jsusp() {
 
-	suscon_t * max_suscon = NULL;
-	suscon_t * sc = suscon_list;
+	jsusp_t * max_jsusp = NULL;
+	jsusp_t * sc = jsusp_list;
 
 	while (sc != NULL) {
 
-		if (max_suscon == NULL) {
-			max_suscon = sc;
+		if (max_jsusp == NULL) {
+			max_jsusp = sc;
 		}
-		else if (max_suscon->sus < sc->sus) {
-			max_suscon = sc;
-		}
-		else if (max_suscon->sus == sc->sus && max_suscon->con < sc->con) {
-			max_suscon = sc;
+		else if (max_jsusp->sus < sc->sus) {
+			max_jsusp = sc;
 		}
 
 		sc = sc->next;
 	}
 
-	return max_suscon;
+	return max_jsusp;
 }
 
 void
-print_tarantula (suscon_t * sorted_list) {
-	suscon_t * sc = sorted_list;
+print_result_jaccard (jsusp_t * sorted_list) {
+	jsusp_t * sc = sorted_list;
 	while (sc != NULL) {
-		printf("branch %u \nsuspiciousness:%.2f, confidence:%.2f\n\n", sc->branch, sc->sus, sc->con);
+		printf("branch %u \nsuspiciousness:%.2f\n\n", sc->branch, sc->sus);
 		sc = sc->next;
 	}
 }

@@ -3,10 +3,12 @@ import struct
 import functools
 import glob
 
+path_set = set()
+
 def parse(fname):
-    data = {}
     f = open(fname,'rb')
     f.read(4) # Total Branch
+    data = []
 
     while (byte := f.read(4)):
         if len(byte) !=  4:
@@ -20,30 +22,27 @@ def parse(fname):
         if len(byte) != des_len[0]:
             break
         des = byte.decode()
-        data[branch[0]] = des
+        if des in path_set:
+                continue
+        else:
+            #print(branch[0], des)
+            data.append( [branch[0], des] )
+            path_set.add(des)
 
     return data
 
 
-path = "./bin/result/*"
+path = "./result/*"
 file_list = glob.glob(path)
 bcov_list = [file for file in file_list if file.endswith(".bcov")]
 
-bcov_des_dic = {}
+
+all_list = []
 for bcov in bcov_list:
     data = parse(bcov)
-    bcov_des_dic.update(data)
+    all_list.extend(data)
 
+all_list.sort()
 
-bn = input("")
-# print(bcov_des_dic[int(bn)])
-
-l = []
-for k in bcov_des_dic.keys():
-    l.append([k ,bcov_des_dic[k]])
-    #print(k,bcov_des_dic[k])
-
-l.sort()
-
-for item in l:
-    print(item[0], item[1])
+for one in all_list:
+    print(one[0], one[1])

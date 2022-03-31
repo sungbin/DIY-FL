@@ -4,51 +4,52 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "../include/fault-local.h"
-#include "../include/tarantula.h"
+#include "../include/ochiai.h"
 #include "../include/runner.h"
 
 #define MAX(a,b) a > b ? a : b
 
-suscon_t * suscon_list = NULL;
+osus_t * osus_list = NULL;
 
-suscon_t *
-sort_rank_tarantula ();
+osus_t *
+sort_rank_ochiai ();
 
-suscon_t *
-find_max_suscon ();
-
-void
-suspicious_confidence (char * dir_path);
+osus_t *
+find_max_osus ();
 
 void
-free_suscon (suscon_t * suscon);
+moleq (char * dir_path);
 
 void
-print_tarantula (suscon_t * sorted_list);
+free_osus (osus_t * osus);
 
 void
-add_suscon_list (suscon_t * suscon);
+print_result_ochiai (osus_t * sorted_list);
+
+void
+add_osus_list (osus_t * osus);
 
 unsigned total_branch;
 
 void
-tarantula (char * dir_path) {
+ochiai (char * dir_path) {
 
-	suspicious_confidence(dir_path);
-	suscon_t * sorted_list = sort_rank_tarantula();
-	printf("Tarantula\n");
+	moleq(dir_path);
+	osus_t * sorted_list = sort_rank_ochiai();
+	printf("Ochiai\n");
 	printf("Total Number of Branch: %u\n", total_branch);
 	printf("Total Number of Bcov Files: %d\n", bcovc);
 	printf("Number of Test Failure: %d\nNumber of Test Pass: %d\n", fn, pn);
 
-	print_tarantula(sorted_list);
-	free_suscon(sorted_list);
+	print_result_ochiai(sorted_list);
+	free_osus(sorted_list);
 }
 
 void
-suspicious_confidence (char * dir_path) {
+moleq (char * dir_path) {
 
 	DIR * dp = opendir(dir_path);
 	struct dirent *ep;
@@ -72,7 +73,7 @@ suspicious_confidence (char * dir_path) {
 	                        sprintf(inner_dir_path, "%s/%s",dir_path,ep->d_name);
 	                        //printf(" \t DIR: %s\n", inner_dir_path);
 
-	                        suspicious_confidence(inner_dir_path);
+	                        moleq(inner_dir_path);
 	                        free(inner_dir_path);
 	                } else {
 
@@ -102,37 +103,27 @@ suspicious_confidence (char * dir_path) {
 							fail_n ++;
 						}
 					}
-					float p_pass = pass_n / pn;
-					float p_fail = fail_n / fn;
-					float suspect;
-					if (p_fail + p_pass != 0) {
-						suspect = p_fail / (p_fail + p_pass);
+					float suspect = 0.0f;
+					if (fail_n + pass_n != 0) {
+						suspect = fail_n / sqrtf(fn*(fail_n + pass_n));
 					}
-					else {
-						suspect = 0.0f;
-					}
-					float conf = MAX(p_fail, p_pass);
 
-					printf("%u %.f %.f (%u, %u)\n", branch, pass_n, fail_n, pn, fn);
+					osus_t * osus = malloc(sizeof(osus_t));
+					osus->branch = branch;
+					osus->sus = suspect;
+					osus->next = NULL;
 
-					suscon_t * suscon = malloc(sizeof(suscon_t));
-					suscon->branch = branch;
-					suscon->sus = suspect;
-					suscon->con = conf;
-					suscon->next = NULL;
+					add_osus_list(osus);
 
-					add_suscon_list(suscon);
-
-					// write suscon
 	                        	char * suscon_path = malloc(sizeof(char) * (parrent_len+child_len+11));
-	                        	sprintf(suscon_path, "%s/%d.suscon", dir_path, branch);
+	                        	sprintf(suscon_path, "%s/%d.osus", dir_path, branch);
 					FILE * suscon_fp = fopen(suscon_path, "wb");
 
 					fwrite(&suspect, 1, 4, suscon_fp);
-					fwrite(&conf, 1, 4, suscon_fp);
 
 					fclose(suscon_fp);
 					free(suscon_path);
+
 					free(inner_file_path);
 				}
 	                }
@@ -148,110 +139,107 @@ suspicious_confidence (char * dir_path) {
 
 
 void
-add_suscon_list (suscon_t * suscon) {
+add_osus_list (osus_t * osus) {
 
-	if (suscon_list == NULL) {
-		suscon_list = suscon;
+	if (osus_list == NULL) {
+		osus_list = osus;
 		return;
 	}
 
-	suscon_t * sc = suscon_list;
+	osus_t * sc = osus_list;
 	while (sc->next != NULL) {
 		sc = sc->next;
 	}
 
-	sc->next = suscon;
+	sc->next = osus;
 }
 
 
-suscon_t *
-sort_rank_tarantula () {	
-	suscon_t * sorted_list = NULL;
+osus_t *
+sort_rank_ochiai () {	
+	osus_t * sorted_list = NULL;
 
-	suscon_t * max_suscon;
-	while ((max_suscon = find_max_suscon(suscon_list)) != NULL) {
+	osus_t * max_osus;
+	while ((max_osus = find_max_osus(osus_list)) != NULL) {
 
-		suscon_t * sc = suscon_list;
+		osus_t * sc = osus_list;
 
-		if (sc == max_suscon) {
+		if (sc == max_osus) {
 
-			// (sc == max_suscon) => (sc2)
-			suscon_list = suscon_list->next;
+			// (sc == max_osus) => (sc2)
+			osus_list = osus_list->next;
 		}
-		else if (max_suscon->next != NULL) {
+		else if (max_osus->next != NULL) {
 
-			// (sc) => (max_suscon) => (sc2)
-			while (sc->next != max_suscon) {
+			// (sc) => (max_osus) => (sc2)
+			while (sc->next != max_osus) {
 				sc = sc->next;
 			} 
-			suscon_t * sc2 = max_suscon->next; 
+			osus_t * sc2 = max_osus->next; 
 			sc->next = sc2;
 		}
 		else {
 		
-			// (sc2) => (max_suscon) => null
-			suscon_t * sc2 = suscon_list;
-			while (sc2->next != max_suscon) {
+			// (sc2) => (max_osus) => null
+			osus_t * sc2 = osus_list;
+			while (sc2->next != max_osus) {
 				sc2 = sc2->next;
 			}
 			sc2->next = NULL;
 		}
-		max_suscon->next = NULL;
+		max_osus->next = NULL;
 
 		if (sorted_list == NULL) {
-			sorted_list = max_suscon;
+			sorted_list = max_osus;
 		}
 		else {
-			suscon_t * sc2 = sorted_list; 
+			osus_t * sc2 = sorted_list; 
 			while (sc2->next != NULL) {
 				sc2 = sc2->next;
 			}
-			sc2->next = max_suscon;
+			sc2->next = max_osus;
 		}
 	}
 	return sorted_list;
 }
 
 void
-free_suscon (suscon_t * suscon) {
+free_osus (osus_t * osus) {
 
-	suscon_t * next;
-	while (suscon != NULL) {
-	        next = suscon->next;
-	        free(suscon);
-	        suscon = next;
+	osus_t * next;
+	while (osus != NULL) {
+	        next = osus->next;
+	        free(osus);
+	        osus = next;
 	}
 }
 
-suscon_t *
-find_max_suscon() {
+osus_t *
+find_max_osus() {
 
-	suscon_t * max_suscon = NULL;
-	suscon_t * sc = suscon_list;
+	osus_t * max_osus = NULL;
+	osus_t * sc = osus_list;
 
 	while (sc != NULL) {
 
-		if (max_suscon == NULL) {
-			max_suscon = sc;
+		if (max_osus == NULL) {
+			max_osus = sc;
 		}
-		else if (max_suscon->sus < sc->sus) {
-			max_suscon = sc;
-		}
-		else if (max_suscon->sus == sc->sus && max_suscon->con < sc->con) {
-			max_suscon = sc;
+		else if (max_osus->sus < sc->sus) {
+			max_osus = sc;
 		}
 
 		sc = sc->next;
 	}
 
-	return max_suscon;
+	return max_osus;
 }
 
 void
-print_tarantula (suscon_t * sorted_list) {
-	suscon_t * sc = sorted_list;
+print_result_ochiai (osus_t * sorted_list) {
+	osus_t * sc = sorted_list;
 	while (sc != NULL) {
-		printf("branch %u \nsuspiciousness:%.2f, confidence:%.2f\n\n", sc->branch, sc->sus, sc->con);
+		printf("branch %u \nsuspiciousness:%.2f\n\n", sc->branch, sc->sus);
 		sc = sc->next;
 	}
 }
