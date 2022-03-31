@@ -346,12 +346,16 @@ read_bcov (char * bcov_path) {
 			// prevent duplicates
 			bcov * _b = b;
 			int dupl = 0;
+
+			// TODO: remove
+			
 			while (_b != 0x0) {
 				
 				if (_b->branch == branch) {
 					dupl = 1; break;
 				}
-				
+				/*
+				*/
 				_b = _b->next;
 			}
 			if (dupl) continue;

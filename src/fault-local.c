@@ -84,9 +84,12 @@ write_branch_files (char * dir_path) {
 					bcovc ++;
 
 					bcov* _blist = blist;
+					printf("branch\n");
 					while (_blist != NULL) {
 
 						unsigned int branch = _blist->branch;
+
+						printf("%u ", branch);
 
 						//printf("FAIL: %d\n", _blist->fail);
 
