@@ -25,11 +25,11 @@ void
 false_localization (char * dir_path) {
 
 	write_branch_files(dir_path);
-	/*
 	tarantula(dir_path);
 	sbi(dir_path);
 	jaccard(dir_path);
 	ochiai(dir_path);
+	/*
 	*/
 }
 
@@ -84,12 +84,11 @@ write_branch_files (char * dir_path) {
 					bcovc ++;
 
 					bcov* _blist = blist;
-					printf("branch\n");
 					while (_blist != NULL) {
 
 						unsigned int branch = _blist->branch;
 
-						printf("%u ", branch);
+						//printf("%u ", branch);
 
 						//printf("FAIL: %d\n", _blist->fail);
 
@@ -104,6 +103,9 @@ write_branch_files (char * dir_path) {
 							fputc(n, fp);
 						}
 						else if ((ep->d_name)[0] == 'f') {
+							if (branch == 63) {
+								fprintf(stderr,"63 branch failed: %s\n", inner_file_path);
+							}
 							int n = 1;
 							fputc(n, fp);
 						}

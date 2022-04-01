@@ -36,8 +36,8 @@ for bcov in bcov_list:
 
 
 bn = input("")
-# print(bcov_des_dic[int(bn)])
-
+print(bcov_des_dic[int(bn)])
+'''
 l = []
 for k in bcov_des_dic.keys():
     l.append([k ,bcov_des_dic[k]])
@@ -47,3 +47,4 @@ l.sort()
 
 for item in l:
     print(item[0], item[1])
+'''

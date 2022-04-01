@@ -223,6 +223,8 @@ explore_dir_with_runner (char * input_dir_path, char * sub_dir, runner_error_cod
 			free(p_dir);
 
 			runner_error_code error_code = (*_runner)(target_path, input_path, program_out_path, is_bcov);
+			fprintf(stderr, "%d\n", ++bcnt);
+
 
 			if (error_code.type == NO_ERROR) {
 				

@@ -52,6 +52,49 @@ def rank_dic_list(dic,sist):
             r = r-1
             dic[k]= r
 
+def analysis_suscon_print(dic):
+    rank = 1
+    pre_rank = 1
+    for i, tup in enumerate(dic):
+        if i == 0:
+            print(tup[0], tup[1], rank)
+            continue
+    
+        elif dic[i-1][1][0] == tup[1][0]:
+            if dic[i-1][1][1] == tup[1][1]:
+                rank = rank + 1
+                print(tup[0], tup[1], pre_rank)
+                continue
+    
+        rank = rank + 1
+        print(tup[0], tup[1], rank)
+        pre_rank = rank
+
+def analysis_suscon(dic):
+    new_dic = {}
+    rank = 1
+    pre_rank = 1
+    for i, tup in enumerate(dic):
+        m = p.search(tup[0]);
+        n = int(m.group(1))
+        if i == 0:
+            new_dic[n] = rank;
+            continue
+    
+        elif dic[i-1][1][0] == tup[1][0]:
+            if dic[i-1][1][1] == tup[1][1]:
+                rank = rank + 1
+                new_dic[n] = pre_rank;
+                continue
+
+        rank = rank + 1
+        new_dic[n] = rank;
+        pre_rank = rank
+
+    return new_dic
+
+
+
 def analysis_sus_print(dic):
     rank = 1
     pre_rank = 1
@@ -60,13 +103,15 @@ def analysis_sus_print(dic):
             print(tup[0], tup[1], rank)
             continue
     
-        elif dic[i-1][1] != tup[1]:
+        elif dic[i-1][1][0] == tup[1][0]:
             rank = rank + 1
             print(tup[0], tup[1], pre_rank)
-        else:
-            rank = rank + 1
-            print(tup[0], tup[1], rank)
-            pre_rank = rank
+            continue
+
+        rank = rank + 1
+        print(tup[0], tup[1], rank)
+        pre_rank = rank
+
 
 p = re.compile(r'(\d+)\.(suscon|ssus|osus|jsus)', re.IGNORECASE)
 def compare(x, y):
@@ -83,13 +128,14 @@ def analysis_sus(dic):
             new_dic[n] = rank;
             continue
     
-        elif dic[i-1][1] != tup[1]:
+        elif dic[i-1][1][0] == tup[1][0]:
             rank = rank + 1
             new_dic[n] = pre_rank;
-        else:
-            rank = rank + 1
-            new_dic[n] = rank;
-            pre_rank = rank
+            continue
+
+        rank = rank + 1
+        new_dic[n] = rank;
+        pre_rank = rank
 
     return new_dic
 
@@ -112,20 +158,23 @@ dict2 = sorted(ssus_dic.items(), key = lambda item: item[1], reverse = True)
 dict3 = sorted(jsus_dic.items(), key = lambda item: item[1], reverse = True)
 dict4 = sorted(osus_dic.items(), key = lambda item: item[1], reverse = True)
 
+analysis_suscon_print(dict1)
 '''
-analysis_sus_print(dict1)
 analysis_sus_print(dict2)
 analysis_sus_print(dict3)
 analysis_sus_print(dict4)
-'''
 
-rank_dic1 = analysis_sus(dict1)
+rank_dic1 = analysis_suscon(dict1)
 rank_dic2 = analysis_sus(dict2)
 rank_dic3 = analysis_sus(dict3)
 rank_dic4 = analysis_sus(dict4)
 
 path_list = sorted(rank_dic4.items(), key=functools.cmp_to_key(compare), reverse = False)
 
+max_val = (path_list[-1])[0]
+print("max: ", max_val)
+
 for k, val in path_list:
     print('{}, {}, {}, {}, {}'.format(k, rank_dic1[k], rank_dic2[k], rank_dic3[k], rank_dic4[k]))
 
+'''

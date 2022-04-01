@@ -113,7 +113,7 @@ suspicious_confidence (char * dir_path) {
 					}
 					float conf = MAX(p_fail, p_pass);
 
-					printf("%u %.f %.f (%u, %u)\n", branch, pass_n, fail_n, pn, fn);
+					//printf("%u %.f %.f (%u, %u)\n", branch, pass_n, fail_n, pn, fn);
 
 					suscon_t * suscon = malloc(sizeof(suscon_t));
 					suscon->branch = branch;
