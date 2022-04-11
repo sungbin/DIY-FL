@@ -1,9 +1,3 @@
-Total Test Case: 120
-Regression Pass case: 119, Fail case: 1
-Target commit: 5465a8e57fe620ceb8efa534e1d6790f423d6bba
-Input: https://gitlab.gnome.org/GNOME/libxml2/uploads/8038930de32ecab920babd0fb3e69955/poc.gz
-
----
 ['4c3fe3', 0.5042372881355932, 1.0]
 ['4c40db', 0.5042372881355932, 1.0]
 ['4c41ff', 0.5042372881355932, 1.0]
