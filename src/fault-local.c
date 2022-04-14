@@ -103,9 +103,6 @@ write_branch_files (char * dir_path) {
 							fputc(n, fp);
 						}
 						else if ((ep->d_name)[0] == 'f') {
-							if (branch == 63) {
-								fprintf(stderr,"63 branch failed: %s\n", inner_file_path);
-							}
 							int n = 1;
 							fputc(n, fp);
 						}
